@@ -1,7 +1,7 @@
 package a1_percolation;
 
 public class Percolation {
-    private int[][] id;
+    private int[] id;
     private int openSites = 0;
     private int sideLength; // length of square side == N
     private int[] topRow;
@@ -11,24 +11,20 @@ public class Percolation {
     public Percolation(int n) {
         if (n > 0) {
             sideLength = n;
-            id = new int[n][n];
+            id = new int[n];
             for (int i = 0; i < n; i++)
                 for (int j = 0; j < n; j++)
-                    id[i][j] = 0;
+                    id[getIndex(i, j)] = 0;
         } else
             throw new IllegalArgumentException();
     }
 
     // open site (row, col) if it is not open already
     public void open(int row, int col) {
-        int[] left = new int[]{row, col-1};
-        int[] right = new int[]{row, col+1};
-        int[] up = new int[]{row-1, col};
-        int[] down = new int[]{row+1, col-1};
-
         if((row > 0) && (col > 0)) {
-            if (id[row][col] == 0) {
-                id[row][col] = row * sideLength + (col + 1);
+            int i = getIndex(row, col);
+            if (id[i] == 0) {
+                id[i] = getClosestParent(row, col);
                 openSites++;
             }
         }
@@ -38,14 +34,14 @@ public class Percolation {
 
     // is site (row, col) open?
     public boolean isOpen(int row, int col) {
-        return id[row][col] > 0;
+        return id[getIndex(row, col)] > 0;
     }
 
 
     // is site (row, col) full?
     public boolean isFull(int row, int col) {
         for (int i = 0; i < sideLength - 1; i++)
-            if (id[row][col] == i)
+            if (id[getIndex(row, col)] == i)
                 return true;
 
         return false;
@@ -68,16 +64,11 @@ public class Percolation {
     }
 
     public int root(int row, int col) {
-        int[] coords;
-        int r = row;
-        int c = col;
-        while (getIndex(r, c) != id[r][c]) {
-            coords = getCoords(id[r][c]);
-            r = coords[0];
-            c = coords[1];
-        }
+        int i = getIndex(row, col);
+        while (i != id[i])
+            i = id[i];
 
-        return getIndex(r, c);
+        return i;
     }
 
     private int getIndex(int row, int col) {
@@ -92,8 +83,23 @@ public class Percolation {
         return coords;
     }
 
+    private int getClosestParent(int row, int col) {
+        int parentIndex;
+
+        int left = getIndex(row, col-1);
+        int right = getIndex(row, col+1);
+        int up = getIndex(row-1, col);
+        int down = getIndex(row+1, col);
+
+        // if all surrounding sites are closed, set index based on self
+        if ((id[left] == 0) && (id[right] == 0) && (id[up] == 0) && (id[down] == 0))
+                return row * sideLength + (col + 1);
+
+        return 0;
+    }
+
     public void setIndex(int row, int col, int index) {
-        id[row][col] = index;
+        id[getIndex(row, col)] = index;
     }
 
     // test client (optional)
