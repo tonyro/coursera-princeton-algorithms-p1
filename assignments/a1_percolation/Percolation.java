@@ -85,6 +85,7 @@ public class Percolation {
 
     private int getClosestParent(int row, int col) {
         int parentIndex;
+        int[] coords = new int[2];
 
         int left = getIndex(row, col-1);
         int right = getIndex(row, col+1);
@@ -94,6 +95,10 @@ public class Percolation {
         // if all surrounding sites are closed, set index based on self
         if ((id[left] == 0) && (id[right] == 0) && (id[up] == 0) && (id[down] == 0))
                 return row * sideLength + (col + 1);
+
+        if (id[left] > 0)
+            coords = getCoords(left);
+            parentIndex = root(coords[0], coords[1]);
 
         return 0;
     }
